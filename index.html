@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学习聚合 · Learning Hub</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700&display=swap');
+
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --surface-2: #fbfbf9;
+    --border: #e8e6e0;
+    --border-strong: #d8d4ca;
+    --text: #1a1a17;
+    --text-2: #5a574f;
+    --text-3: #8a8678;
+    --accent: #2d5d3a;
+    --accent-soft: #e8f0e9;
+    --warn: #b87333;
+    --warn-soft: #f5ecdf;
+    --info: #3a5a8c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg); color: var(--text);
+    font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .serif { font-family: 'Noto Serif SC', serif; }
+
+  /* ===== Header ===== */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(247,247,245,0.88);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-inner {
+    max-width: 1240px; margin: 0 auto;
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 28px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark {
+    width: 28px; height: 28px;
+    background: var(--accent); color: #fff;
+    border-radius: 7px;
+    display: grid; place-items: center;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700; font-size: 15px;
+  }
+  .brand-name { font-family: 'Noto Serif SC', serif; font-weight: 700; font-size: 18px; }
+  .brand-sub { font-size: 11px; color: var(--text-3); letter-spacing: 0.18em; text-transform: uppercase; margin-left: 4px; }
+
+  nav.tabs { display: flex; gap: 4px; }
+  .tab {
+    appearance: none; border: 0; background: transparent;
+    padding: 8px 14px; border-radius: 7px;
+    font: inherit; font-size: 13.5px; font-weight: 500;
+    color: var(--text-2); cursor: pointer;
+    transition: background .15s, color .15s;
+    position: relative;
+  }
+  .tab:hover { background: rgba(0,0,0,0.03); color: var(--text); }
+  .tab.active { background: var(--text); color: #fff; }
+  .tab .badge {
+    position: absolute; top: 2px; right: 4px;
+    background: var(--warn); color: #fff;
+    font-size: 9px; font-weight: 700;
+    min-width: 15px; height: 15px; border-radius: 8px;
+    display: grid; place-items: center; padding: 0 3px;
+  }
+  .tab .badge:empty { display: none; }
+
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-variant-numeric: tabular-nums; }
+  .crawler-status { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--text-2); }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--info); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; transform:scale(1);} 50% { opacity:.4; transform:scale(.8);} }
+  #clock { font-size: 13px; font-weight: 500; }
+  .date-label { font-size: 11.5px; color: var(--text-3); }
+
+  /* ===== Layout ===== */
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 32px 80px; }
+  .page { display: none; animation: fade .35s ease; }
+  .page.active { display: block; }
+  @keyframes fade { from { opacity:0; transform:translateY(6px);} to { opacity:1; transform:none;} }
+
+  .page-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 22px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 16px; flex-wrap: wrap;
+  }
+  .page-title { font-family: 'Noto Serif SC', serif; font-size: 28px; font-weight: 700; line-height: 1.15; }
+  .page-desc { color: var(--text-2); font-size: 13px; margin-top: 6px; }
+
+  /* ===== Filters: subjects + grade ===== */
+  .filters { margin-bottom: 22px; }
+  .filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .filter-label { font-size: 11.5px; color: var(--text-3); letter-spacing: 0.06em; text-transform: uppercase; min-width: 56px; }
+  .subjects { display: flex; flex-wrap: wrap; gap: 7px; flex: 1; }
+  .chip {
+    padding: 6px 13px; border-radius: 999px;
+    border: 1px solid var(--border-strong); background: var(--surface);
+    font: inherit; font-size: 12.5px; font-weight: 500; color: var(--text-2);
+    cursor: pointer; transition: all .15s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .chip:hover { border-color: var(--text); color: var(--text); }
+  .chip.active { background: var(--text); color: #fff; border-color: var(--text); }
+  .chip .swatch { width: 7px; height: 7px; border-radius: 50%; background: var(--subject-color, var(--accent)); }
+
+  .grade-select, .sem-toggle {
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  select.grade {
+    appearance: none; border: 1px solid var(--border-strong);
+    background: var(--surface); padding: 6px 28px 6px 12px;
+    border-radius: 7px; font: inherit; font-size: 12.5px; color: var(--text);
+    cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%235a574f' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+  .seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 7px; overflow: hidden; }
+  .seg button {
+    appearance: none; border: 0; background: var(--surface);
+    padding: 6px 12px; font: inherit; font-size: 12.5px; color: var(--text-2);
+    cursor: pointer; border-right: 1px solid var(--border-strong);
+  }
+  .seg button:last-child { border-right: 0; }
+  .seg button.active { background: var(--text); color: #fff; }
+
+  /* ===== Stat grid ===== */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--border);
+    border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; margin-bottom: 26px;
+  }
+  .stat { background: var(--surface); padding: 18px 20px; }
+  .stat-label { font-size: 11px; color: var(--text-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 9px; }
+  .stat-value { font-size: 28px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .stat-value .unit { font-size: 13px; color: var(--text-3); font-weight: 400; margin-left: 3px; }
+  .stat-meta { margin-top: 8px; font-size: 12px; color: var(--text-2); }
+  .delta-up { color: var(--accent); }
+  .delta-down { color: var(--warn); }
+  .stat-meta.muted { color: var(--text-3); }
+
+  /* ===== Panels ===== */
+  .grid-2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 22px; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 10px; }
+  .panel-title { font-size: 14.5px; font-weight: 600; }
+  .panel-action { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+  /* subject rows */
+  .subj-list { display: flex; flex-direction: column; }
+  .subj-row {
+    display: grid; grid-template-columns: 24px 1fr auto 90px 56px;
+    align-items: center; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+  }
+  .subj-row:last-child { border-bottom: 0; }
+  .subj-idx { font-size: 11px; color: var(--text-3); }
+  .subj-name { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .subj-dot { width: 9px; height: 9px; border-radius: 2px; }
+  .subj-meta { color: var(--text-3); font-size: 12px; font-weight: 400; }
+  .subj-time { font-size: 13px; color: var(--text-2); }
+  .subj-bar { height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .subj-bar-fill { height: 100%; border-radius: 999px; transition: width .6s ease; }
+  .subj-pct { font-size: 12.5px; font-weight: 600; text-align: right; color: var(--text-2); }
+
+  /* progress ring */
+  .ring-wrap { display: flex; align-items: center; gap: 24px; justify-content: center; padding: 10px 0; }
+  .ring { position: relative; width: 150px; height: 150px; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring-bg { stroke: var(--border); }
+  .ring-fg { stroke: var(--accent); transition: stroke-dashoffset 1s ease; }
+  .ring-center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+  .ring-num { font-size: 32px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+  .ring-label { font-size: 11px; color: var(--text-3); margin-top: 5px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .ring-side { flex: 1; }
+  .kv { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .kv:last-child { border-bottom: 0; }
+  .kv-key { color: var(--text-2); }
+  .kv-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* bar chart */
+  .barchart { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding-top: 10px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .bar { width: 100%; max-width: 22px; background: var(--accent); border-radius: 3px 3px 0 0; min-height: 3px; opacity: 0.35; transition: opacity .2s, height .6s ease; }
+  .bar.today { opacity: 1; background: var(--text); }
+  .bar-col:hover .bar { opacity: 0.8; }
+  .bar-col:hover .bar.today { opacity: 1; }
+  .bar-label { font-size: 10px; color: var(--text-3); }
+
+  /* ===== Quiz ===== */
+  .quiz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px 32px; margin-bottom: 22px; }
+  .quiz-meta { display: flex; align-items: center; gap: 12px; font-size: 12.5px; color: var(--text-3); margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .quiz-tag { padding: 3px 9px; border-radius: 5px; font-size: 11.5px; font-weight: 600; }
+  .quiz-num { font-variant-numeric: tabular-nums; color: var(--text); font-weight: 500; }
+  .q-text { font-family: 'Noto Serif SC', serif; font-size: 20px; font-weight: 500; line-height: 1.5; margin-bottom: 20px; }
+  .options { display: flex; flex-direction: column; gap: 9px; }
+  .option { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--border-strong); border-radius: 9px; cursor: pointer; transition: all .15s; background: var(--surface); }
+  .option:hover { border-color: var(--text); background: var(--surface-2); }
+  .option.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .option.correct { border-color: var(--accent); background: var(--accent-soft); }
+  .option.wrong { border-color: var(--warn); background: var(--warn-soft); }
+  .option-letter { width: 26px; height: 26px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border-strong); display: grid; place-items: center; font-size: 12px; font-weight: 600; color: var(--text-2); }
+  .option.selected .option-letter, .option.correct .option-letter { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .option.wrong .option-letter { background: var(--warn); color: #fff; border-color: var(--warn); }
+  .option-text { font-size: 14px; }
+  .quiz-explain { margin-top: 16px; padding: 13px 15px; background: var(--surface-2); border-radius: 9px; font-size: 13px; color: var(--text-2); }
+  .quiz-explain strong { color: var(--text); }
+  .quiz-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); }
+  .btn { appearance: none; border: 0; cursor: pointer; font: inherit; font-weight: 500; font-size: 13.5px; padding: 9px 18px; border-radius: 8px; transition: all .15s; }
+  .btn-primary { background: var(--text); color: #fff; }
+  .btn-primary:hover { background: #000; }
+  .btn-ghost { background: transparent; color: var(--text-2); }
+  .btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ===== Courses ===== */
+  .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+  .course { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color .15s, transform .15s; }
+  .course:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  .course-cover { height: 120px; position: relative; display: flex; align-items: flex-end; padding: 13px 15px; }
+  .course-cover::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.45), transparent 60%); }
+  .course-subj { position: relative; z-index: 1; color: #fff; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 4px; backdrop-filter: blur(4px); }
+  .course-body { padding: 15px 17px 17px; }
+  .course-title { font-family: 'Noto Serif SC', serif; font-size: 15.5px; font-weight: 700; line-height: 1.35; margin-bottom: 5px; }
+  .course-meta { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .course-progress { height: 4px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin-bottom: 9px; }
+  .course-progress-fill { height: 100%; border-radius: 999px; transition: width .6s ease; }
+  .course-foot { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .course-pct { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .course-action { color: var(--accent); font-weight: 600; cursor: pointer; background: none; border: 0; padding: 0; font: inherit; }
+  .course-action:hover { text-decoration: underline; }
+  .course-likes { color: var(--text-3); font-size: 11.5px; display: inline-flex; align-items: center; gap: 3px; }
+
+  /* ===== Wrong notebook ===== */
+  .wrong-list { display: flex; flex-direction: column; gap: 14px; }
+  .wrong-item { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--warn); border-radius: 10px; padding: 16px 18px; }
+  .wrong-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .wrong-q { font-family: 'Noto Serif SC', serif; font-size: 15.5px; font-weight: 500; margin-bottom: 10px; line-height: 1.45; }
+  .wrong-opts { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .wrong-opt { display: flex; align-items: center; gap: 9px; font-size: 13px; padding: 7px 11px; border-radius: 7px; border: 1px solid var(--border); }
+  .wrong-opt.correct { border-color: var(--accent); background: var(--accent-soft); }
+  .wrong-opt.picked { border-color: var(--warn); background: var(--warn-soft); }
+  .wrong-foot { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-3); margin-top: 8px; }
+
+  .empty-hint { text-align: center; padding: 50px 20px; color: var(--text-3); font-size: 13px; }
+  .loading { text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 13px; }
+
+  /* toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; z-index: 100; opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+
+  /* responsive */
+  @media (max-width: 880px) {
+    .header-inner { padding: 12px 16px; gap: 12px; flex-wrap: wrap; }
+    .header-right { order: 3; width: 100%; justify-content: flex-end; }
+    .crawler-status { display: none; }
+    main { padding: 18px 16px 60px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .page-title { font-size: 22px; }
+    .quiz-card { padding: 20px 18px; }
+    .subj-row { grid-template-columns: 20px 1fr auto 50px; }
+    .subj-row .subj-pct { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">学</div>
+      <div>
+        <span class="brand-name">学习聚合</span>
+        <span class="brand-sub">Learning Hub</span>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-page="today">今日学习</button>
+      <button class="tab" data-page="quiz">答题</button>
+      <button class="tab" data-page="course">网课</button>
+      <button class="tab" data-page="wrong">错题本<span class="badge" id="wrong-badge"></span></button>
+    </nav>
+    <div class="header-right">
+      <div class="crawler-status" title="爬虫数据源状态">
+        <span class="live-dot"></span>
+        <span id="crawler-label">社区源 · 加载中</span>
+      </div>
+      <div>
+        <div id="clock">--:--:--</div>
+        <div class="date-label" id="date-label">--</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Filters shared (subject + grade + semester) -->
+  <div class="filters" id="filters"></div>
+
+  <!-- ===== Today ===== -->
+  <section class="page active" id="page-today">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">今日学习</h1>
+        <p class="page-desc">基于你今天真实的学习行为(答题/网课浏览时长),按日记录 · 次日自动重置</p>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">累计学习时长</div>
+        <div class="stat-value"><span id="stat-total">0</span><span class="unit">分钟</span></div>
+        <div class="stat-meta muted">目标 240 分钟 · <span id="stat-rate-day">0%</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">今日答题</div>
+        <div class="stat-value"><span id="stat-answered">0</span><span class="unit">题</span></div>
+        <div class="stat-meta">对 <span class="delta-up" id="stat-correct">0</span> · 错 <span class="delta-down" id="stat-wrong">0</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">答题正确率</div>
+        <div class="stat-value"><span id="stat-acc">0</span><span class="unit">%</span></div>
+        <div class="stat-meta" id="stat-acc-meta">尚未答题</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">学习中的科目</div>
+        <div class="stat-value"><span id="stat-active-subj">0</span><span class="unit">/ 7</span></div>
+        <div class="stat-meta muted">错题本 <span id="stat-wrong-count">0</span> 题</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">分科目学习时长 (真实)</div>
+          <div class="panel-action">实时累计</div>
+        </div>
+        <div class="subj-list" id="subj-list"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">今日目标进度</div>
+          <div class="panel-action" id="ring-pct">0%</div>
+        </div>
+        <div class="ring-wrap">
+          <div class="ring">
+            <svg width="150" height="150">
+              <circle class="ring-bg" cx="75" cy="75" r="65" fill="none" stroke-width="10"/>
+              <circle class="ring-fg" id="ring-fg" cx="75" cy="75" r="65" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="408.4" stroke-dashoffset="408.4"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-num" id="ring-num">0%</div>
+              <div class="ring-label">日目标</div>
+            </div>
+          </div>
+        </div>
+        <div class="ring-side">
+          <div class="kv"><span class="kv-key">已学习</span><span class="kv-val" id="kv-done">0 分钟</span></div>
+          <div class="kv"><span class="kv-key">剩余目标</span><span class="kv-val" id="kv-left">240 分钟</span></div>
+          <div class="kv"><span class="kv-key">预计完成</span><span class="kv-val" id="kv-eta">--:--</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:22px">
+      <div class="panel-head">
+        <div class="panel-title">本周学习时长 (真实)</div>
+        <div class="panel-action">单位: 分钟</div>
+      </div>
+      <div class="barchart" id="barchart"></div>
+    </div>
+  </section>
+
+  <!-- ===== Quiz ===== -->
+  <section class="page" id="page-quiz">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">答题</h1>
+        <p class="page-desc">题目来自社区题库(爬虫实时抓取),随社区资源变动 · 答题时长计入今日学习</p>
+      </div>
+      <button class="btn btn-ghost" id="quiz-refresh">↻ 刷新社区题库</button>
+    </div>
+
+    <div class="quiz-card" id="quiz-card"><div class="loading">加载社区题库…</div></div>
+  </section>
+
+  <!-- ===== Course ===== -->
+  <section class="page" id="page-course">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">网课</h1>
+        <p class="page-desc">课程来自社区资源(爬虫实时抓取),每 90 秒自动刷新 · 观看时长计入今日学习</p>
+      </div>
+      <button class="btn btn-ghost" id="course-refresh">↻ 刷新社区课程</button>
+    </div>
+    <div class="course-grid" id="course-grid"><div class="loading">加载社区课程…</div></div>
+  </section>
+
+  <!-- ===== Wrong notebook ===== -->
+  <section class="page" id="page-wrong">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">错题本</h1>
+        <p class="page-desc">自动记录你在答题页答错的题目 · 本地持久保存 · 可重做</p>
+      </div>
+      <button class="btn btn-ghost" id="wrong-clear">清空错题本</button>
+    </div>
+    <div class="wrong-list" id="wrong-list"><div class="loading">加载错题…</div></div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="crawler-client.js"></script>
+<script>
+/* ============================================================
+   学习聚合 前端
+   - 网课/答题: 从 /api 实时拉取(爬虫),定时刷新随社区变动
+   - 今日学习: 真实数据(localStorage, 按日重置)
+   - 每学科年级选择(初一-高三 + 上册/下册), 作用于网课与答题
+   - 错题本: 答题错题自动入册
+   ============================================================ */
+
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const fmt2 = n => String(n).padStart(2, '0');
+const todayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${fmt2(d.getMonth()+1)}-${fmt2(d.getDate())}`;
+};
+
+const SUBJECTS = [
+  { key: 'math',    name: '数学', color: '#2d5d3a' },
+  { key: 'chinese', name: '语文', color: '#8b5a2b' },
+  { key: 'chem',    name: '化学', color: '#3a5a8c' },
+  { key: 'history', name: '历史', color: '#7a4a6a' },
+  { key: 'english', name: '英语', color: '#4a6a8c' },
+  { key: 'foreign', name: '外语', color: '#8c5a3a' },
+  { key: 'coding',  name: '程序', color: '#1f4d5c' },
+];
+const SUBJ_BY_KEY = Object.fromEntries(SUBJECTS.map(s => [s.key, s]));
+const GRADES = [
+  { key: 'g7',  label: '初一' },
+  { key: 'g8',  label: '初二' },
+  { key: 'g9',  label: '初三' },
+  { key: 'g10', label: '高一' },
+  { key: 'g11', label: '高二' },
+  { key: 'g12', label: '高三' },
+];
+const SEM_LABEL = { upper: '上册', lower: '下册' };
+
+/* ===== 全局状态 ===== */
+const state = {
+  activeSubject: 'all',         // 当前选中科目 (all 或 单科)
+  subjectGrade: {},              // 每个学科的年级选择 { math: {grade, semester}, ... }
+  quiz: { items: [], idx: 0, picked: -1, revealed: false, feedVersion: 0, loading: true },
+  courses: { items: [], feedVersion: 0, loading: true },
+  crawler: { source: '', feedVersion: 0, lastRefresh: 0 },
+};
+
+// 默认每学科年级 = 高一上册
+SUBJECTS.forEach(s => { state.subjectGrade[s.key] = { grade: 'g10', semester: 'upper' }; });
+
+/* ===== localStorage: 今日真实学习数据 ===== */
+function loadDaily() {
+  const KEY = 'studyhub_daily';
+  const today = todayStr();
+  let data;
+  try { data = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { data = {}; }
+  if (data.date !== today) {
+    data = { date: today, subjects: {}, week: [0,0,0,0,0,0,0] };
+    SUBJECTS.forEach(s => { data.subjects[s.key] = { minutes: 0, answered: 0, correct: 0, wrong: 0 }; });
+  }
+  if (!data.subjects) { data.subjects = {}; SUBJECTS.forEach(s => { data.subjects[s.key] = data.subjects[s.key] || { minutes:0, answered:0, correct:0, wrong:0 }; }); }
+  if (!data.week || data.week.length !== 7) {
+    // 本周数据: 用一个单独的周 key
+    data.week = loadWeek();
+  }
+  return data;
+}
+function saveDaily(d) { localStorage.setItem('studyhub_daily', JSON.stringify(d)); }
+
+function loadWeek() {
+  const KEY = 'studyhub_week';
+  const now = new Date();
+  // 周一为一周起点
+  const day = (now.getDay() + 6) % 7;
+  const monday = new Date(now); monday.setDate(now.getDate() - day);
+  const mondayStr = `${monday.getFullYear()}-${fmt2(monday.getMonth()+1)}-${fmt2(monday.getDate())}`;
+  let w;
+  try { w = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { w = {}; }
+  if (w.monday !== mondayStr) {
+    w = { monday: mondayStr, days: [0,0,0,0,0,0,0] };
+  }
+  return w.days;
+}
+function saveWeek(days) {
+  const KEY = 'studyhub_week';
+  const now = new Date();
+  const day = (now.getDay() + 6) % 7;
+  const monday = new Date(now); monday.setDate(now.getDate() - day);
+  const mondayStr = `${monday.getFullYear()}-${fmt2(monday.getMonth()+1)}-${fmt2(monday.getDate())}`;
+  localStorage.setItem(KEY, JSON.stringify({ monday: mondayStr, days }));
+}
+
+function addMinutes(subjectKey, mins) {
+  const d = loadDaily();
+  if (!d.subjects[subjectKey]) d.subjects[subjectKey] = { minutes:0, answered:0, correct:0, wrong:0 };
+  d.subjects[subjectKey].minutes += mins;
+  const todayIdx = (new Date().getDay() + 6) % 7; // 周一=0
+  const week = loadWeek();
+  week[todayIdx] += mins;
+  saveWeek(week);
+  d.week = week;
+  saveDaily(d);
+}
+function recordQuizAnswer(subjectKey, isCorrect) {
+  const d = loadDaily();
+  if (!d.subjects[subjectKey]) d.subjects[subjectKey] = { minutes:0, answered:0, correct:0, wrong:0 };
+  d.subjects[subjectKey].answered++;
+  if (isCorrect) d.subjects[subjectKey].correct++; else d.subjects[subjectKey].wrong++;
+  saveDaily(d);
+}
+
+/* ===== localStorage: 错题本 ===== */
+function loadWrong() {
+  try { return JSON.parse(localStorage.getItem('studyhub_wrong') || '[]'); } catch { return []; }
+}
+function saveWrong(arr) { localStorage.setItem('studyhub_wrong', JSON.stringify(arr)); }
+function addWrong(item) {
+  const arr = loadWrong();
+  // 去重: 同题干+同科目只保留最新一条
+  const idx = arr.findIndex(x => x.q === item.q && x.subject === item.subject);
+  if (idx >= 0) arr[idx] = item; else arr.unshift(item);
+  saveWrong(arr);
+}
+function removeWrong(id) {
+  const arr = loadWrong().filter(x => x.id !== id);
+  saveWrong(arr);
+}
+
+/* ===== Toast ===== */
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ===== Filters 渲染 ===== */
+function activeGradeInfo() {
+  // 当前筛选上下文的年级/学期: 若选中具体科目, 用该科目的; 若 all, 用高一上册作默认
+  if (state.activeSubject === 'all') return { grade: 'g10', semester: 'upper' };
+  return state.subjectGrade[state.activeSubject];
+}
+
+function renderFilters() {
+  const wrap = $('#filters');
+  const subj = state.activeSubject;
+  const gi = activeGradeInfo();
+  const showGrade = subj !== 'all';
+
+  wrap.innerHTML = `
+    <div class="filter-row">
+      <span class="filter-label">科目</span>
+      <div class="subjects" id="subjects"></div>
+    </div>
+    ${showGrade ? `
+    <div class="filter-row" id="grade-row">
+      <span class="filter-label">年级</span>
+      <select class="grade" id="grade-select">
+        ${GRADES.map(g => `<option value="${g.key}" ${gi.grade===g.key?'selected':''}>${g.label}</option>`).join('')}
+      </select>
+      <span class="filter-label" style="margin-left:8px">学期</span>
+      <div class="seg" id="sem-toggle">
+        <button data-sem="upper" class="${gi.semester==='upper'?'active':''}">上册</button>
+        <button data-sem="lower" class="${gi.semester==='lower'?'active':''}">下册</button>
+      </div>
+      <span style="font-size:11.5px;color:var(--text-3);margin-left:auto">应用范围: 答题 · 网课</span>
+    </div>` : ''}
+  `;
+
+  const subjWrap = $('#subjects');
+  const all = document.createElement('button');
+  all.className = 'chip' + (subj === 'all' ? ' active' : '');
+  all.innerHTML = `<span class="swatch" style="background:#1a1a17"></span>全部`;
+  all.onclick = () => { state.activeSubject = 'all'; rerenderAll(); };
+  subjWrap.appendChild(all);
+  SUBJECTS.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (subj === s.key ? ' active' : '');
+    b.innerHTML = `<span class="swatch" style="background:${s.color}"></span>${s.name}`;
+    b.onclick = () => { state.activeSubject = s.key; rerenderAll(); };
+    subjWrap.appendChild(b);
+  });
+
+  if (showGrade) {
+    $('#grade-select').onchange = (e) => {
+      state.subjectGrade[subj].grade = e.target.value;
+      // 改变年级 → 重新拉取题目/课程
+      fetchQuizzes(); fetchCourses(); rerenderAll();
+    };
+    $$('#sem-toggle button').forEach(btn => {
+      btn.onclick = () => {
+        state.subjectGrade[subj].semester = btn.dataset.sem;
+        fetchQuizzes(); fetchCourses(); rerenderAll();
+      };
+    });
+  }
+}
+
+/* ===== API ===== */
+async function api(path) {
+    const url = new URL(path, location.href);
+    return CrawlerAPI.handle(url.pathname, Object.fromEntries(url.searchParams));
+  }
+
+async function fetchQuizzes() {
+  const subj = state.activeSubject;
+  if (subj === 'all') {
+    // 全部: 拉取每个学科的当前年级题目并合并
+    state.quiz.loading = true; renderQuiz();
+    const lists = await Promise.all(SUBJECTS.map(s => {
+      const g = state.subjectGrade[s.key];
+      return api(`/api/quizzes?subject=${s.key}&grade=${g.grade}&semester=${g.semester}`).then(r => r.items).catch(() => []);
+    }));
+    const merged = [];
+    lists.forEach((arr, i) => arr.forEach(q => merged.push({ ...q, subject: SUBJECTS[i].key })));
+    state.quiz.items = merged;
+    state.quiz.idx = 0; state.quiz.picked = -1; state.quiz.revealed = false;
+    state.quiz.loading = false;
+    renderQuiz();
+    return;
+  }
+  state.quiz.loading = true; renderQuiz();
+  const g = state.subjectGrade[subj];
+  try {
+    const r = await api(`/api/quizzes?subject=${subj}&grade=${g.grade}&semester=${g.semester}`);
+    state.quiz.items = r.items.map(q => ({ ...q, subject: subj }));
+    state.quiz.feedVersion = r.feedVersion;
+    state.crawler.source = r.source;
+    state.quiz.idx = 0; state.quiz.picked = -1; state.quiz.revealed = false;
+  } catch (e) { state.quiz.items = []; }
+  state.quiz.loading = false;
+  renderQuiz(); renderCrawlerLabel();
+}
+
+async function fetchCourses() {
+  const subj = state.activeSubject;
+  if (subj === 'all') {
+    state.courses.loading = true; renderCourses();
+    const lists = await Promise.all(SUBJECTS.map(s => {
+      const g = state.subjectGrade[s.key];
+      return api(`/api/courses?subject=${s.key}&grade=${g.grade}&semester=${g.semester}`).then(r => r.items.map(c => ({ ...c, subject: s.key }))).catch(() => []);
+    }));
+    state.courses.items = lists.flat();
+    state.courses.loading = false;
+    renderCourses();
+    return;
+  }
+  state.courses.loading = true; renderCourses();
+  const g = state.subjectGrade[subj];
+  try {
+    const r = await api(`/api/courses?subject=${subj}&grade=${g.grade}&semester=${g.semester}`);
+    state.courses.items = r.items.map(c => ({ ...c, subject: subj }));
+    state.courses.feedVersion = r.feedVersion;
+    state.crawler.source = r.source;
+  } catch (e) { state.courses.items = []; }
+  state.courses.loading = false;
+  renderCourses(); renderCrawlerLabel();
+}
+
+async function fetchCrawlerStatus() {
+  try {
+    const s = await api('/api/status');
+    state.crawler = { source: s.source, feedVersion: s.feedVersion, lastRefresh: s.lastRefresh, nextRefreshIn: s.nextRefreshIn };
+    renderCrawlerLabel();
+  } catch {}
+}
+
+/* ===== Crawler label ===== */
+function renderCrawlerLabel() {
+  const lbl = $('#crawler-label');
+  if (!state.crawler.source) { lbl.textContent = '社区源 · 加载中'; return; }
+  const v = state.crawler.feedVersion || 0;
+  lbl.textContent = `${state.crawler.source} · v${v}`;
+  lbl.title = `社区资源版本 v${v}\n每 90 秒自动刷新\n下次刷新约 ${Math.ceil((state.crawler.nextRefreshIn||0)/1000)}s 后`;
+}
+
+/* ===== Today page ===== */
+function renderToday() {
+  const d = loadDaily();
+  const subs = SUBJECTS; // 今日学习页展示全部 7 科
+  const total = subs.reduce((a, s) => a + (d.subjects[s.key]?.minutes || 0), 0);
+  const answered = subs.reduce((a, s) => a + (d.subjects[s.key]?.answered || 0), 0);
+  const correct = subs.reduce((a, s) => a + (d.subjects[s.key]?.correct || 0), 0);
+  const wrong = subs.reduce((a, s) => a + (d.subjects[s.key]?.wrong || 0), 0);
+  const acc = answered ? Math.round(correct / answered * 100) : 0;
+  const activeSubj = subs.filter(s => (d.subjects[s.key]?.minutes || 0) > 0).length;
+  const wrongTotal = loadWrong().length;
+  const week = loadWeek();
+
+  $('#stat-total').textContent = total;
+  $('#stat-rate-day').textContent = Math.min(100, Math.round(total / 240 * 100)) + '%';
+  $('#stat-answered').textContent = answered;
+  $('#stat-correct').textContent = correct;
+  $('#stat-wrong').textContent = wrong;
+  $('#stat-acc').textContent = acc;
+  $('#stat-acc-meta').textContent = answered ? (acc >= 80 ? '保持得不错' : '建议复习错题') : '尚未答题';
+  $('#stat-active-subj').textContent = activeSubj;
+  $('#stat-wrong-count').textContent = wrongTotal;
+
+  // subject list
+  const list = $('#subj-list');
+  list.innerHTML = '';
+  subs.forEach((s, i) => {
+    const sd = d.subjects[s.key] || { minutes:0, answered:0, correct:0, wrong:0 };
+    const g = state.subjectGrade[s.key];
+    const pct = Math.min(100, Math.round(sd.minutes / 60 * 100));
+    const row = document.createElement('div');
+    row.className = 'subj-row';
+    row.innerHTML = `
+      <div class="subj-idx">${fmt2(i+1)}</div>
+      <div class="subj-name">
+        <span class="subj-dot" style="background:${s.color}"></span>${s.name}
+        <span class="subj-meta">${GRADES.find(x=>x.key===g.grade).label} ${SEM_LABEL[g.semester]} · 答 ${sd.answered} · 对 ${sd.correct} · 错 ${sd.wrong}</span>
+      </div>
+      <div class="subj-time">${sd.minutes} 分钟</div>
+      <div class="subj-bar"><div class="subj-bar-fill" style="width:${pct}%; background:${s.color}"></div></div>
+      <div class="subj-pct">${pct}%</div>
+    `;
+    list.appendChild(row);
+  });
+
+  // ring
+  const ringPct = Math.min(100, Math.round(total / 240 * 100));
+  const circ = 2 * Math.PI * 65;
+  const offset = circ - circ * ringPct / 100;
+  $('#ring-fg').setAttribute('stroke-dashoffset', offset);
+  $('#ring-num').textContent = ringPct + '%';
+  $('#ring-pct').textContent = ringPct + '%';
+  $('#kv-done').textContent = total + ' 分钟';
+  $('#kv-left').textContent = Math.max(0, 240 - total) + ' 分钟';
+  const eta = new Date(Date.now() + Math.max(0, 240 - total) * 60000);
+  $('#kv-eta').textContent = total >= 240 ? '已达成' : (fmt2(eta.getHours()) + ':' + fmt2(eta.getMinutes()));
+
+  // week bar chart
+  const bc = $('#barchart');
+  bc.innerHTML = '';
+  const max = Math.max(...week, 240, 1);
+  const days = ['周一','周二','周三','周四','周五','周六','周日'];
+  const todayIdx = (new Date().getDay() + 6) % 7;
+  week.forEach((v, i) => {
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    const bar = document.createElement('div');
+    bar.className = 'bar' + (i === todayIdx ? ' today' : '');
+    bar.style.height = (v / max * 100) + '%';
+    bar.title = v + ' 分钟';
+    const lbl = document.createElement('div');
+    lbl.className = 'bar-label';
+    lbl.textContent = days[i];
+    col.appendChild(bar); col.appendChild(lbl);
+    bc.appendChild(col);
+  });
+
+  // wrong badge
+  $('#wrong-badge').textContent = wrongTotal > 0 ? wrongTotal : '';
+}
+
+/* ===== Quiz page ===== */
+function renderQuiz() {
+  const card = $('#quiz-card');
+  if (state.quiz.loading) { card.innerHTML = '<div class="loading">加载社区题库…</div>'; return; }
+  const list = state.quiz.items;
+  if (!list.length) {
+    card.innerHTML = `<div class="empty-hint">该科目/年级暂无社区题目<br><span style="font-size:12px">可点击右上角"刷新社区题库"或切换年级/学期</span></div>`;
+    return;
+  }
+  if (state.quiz.idx >= list.length) state.quiz.idx = 0;
+  const q = list[state.quiz.idx];
+  const subj = SUBJ_BY_KEY[q.subject];
+  const g = GRADES.find(x => x.key === q.grade);
+  const letters = ['A','B','C','D'];
+
+  card.innerHTML = `
+    <div class="quiz-meta">
+      <span class="quiz-tag" style="background:${subj.color}1a; color:${subj.color}">${subj.name}</span>
+      <span>${g.label} ${SEM_LABEL[q.semester]}</span>
+      <span>·</span>
+      <span>第 <span class="quiz-num">${state.quiz.idx + 1}</span> / ${list.length} 题</span>
+      <span>·</span>
+      <span>社区源 v${state.quiz.feedVersion}</span>
+    </div>
+    <div class="q-text">${q.q}</div>
+    <div class="options" id="options">
+      ${q.opts.map((o, i) => `
+        <div class="option" data-i="${i}">
+          <div class="option-letter">${letters[i]}</div>
+          <div class="option-text">${o}</div>
+        </div>`).join('')}
+    </div>
+    ${state.quiz.revealed ? `<div class="quiz-explain"><strong>解析 ·</strong> ${q.e || ''}</div>` : ''}
+    <div class="quiz-footer">
+      <button class="btn btn-ghost" id="prev-q">上一题</button>
+      <button class="btn btn-primary" id="next-q" disabled>${state.quiz.revealed ? (state.quiz.idx + 1 >= list.length ? '完成' : '下一题') : '提交答案'}</button>
+    </div>
+  `;
+
+  $$('#options .option').forEach(el => {
+    el.onclick = () => {
+      if (state.quiz.revealed) return;
+      $$('#options .option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      state.quiz.picked = +el.dataset.i;
+      $('#next-q').disabled = false;
+    };
+  });
+  $('#prev-q').onclick = () => {
+    if (state.quiz.idx > 0) { state.quiz.idx--; state.quiz.picked = -1; state.quiz.revealed = false; renderQuiz(); }
+  };
+  $('#next-q').onclick = () => {
+    if (!state.quiz.revealed) {
+      // 提交
+      state.quiz.revealed = true;
+      const picked = state.quiz.picked;
+      $$('#options .option').forEach((el, i) => {
+        if (i === q.a) el.classList.add('correct');
+        else if (i === picked) el.classList.add('wrong');
+      });
+      const isCorrect = picked === q.a;
+      recordQuizAnswer(q.subject, isCorrect);
+      // 错题入册
+      if (!isCorrect) {
+        addWrong({
+          id: Date.now() + '-' + Math.random().toString(36).slice(2,7),
+          subject: q.subject, grade: q.grade, semester: q.semester,
+          q: q.q, opts: q.opts, correctIdx: q.a, pickedIdx: picked,
+          e: q.e, ts: Date.now()
+        });
+        toast('已加入错题本');
+      } else {
+        toast('回答正确');
+      }
+      renderQuiz(); renderToday(); renderWrongBadge();
+    } else {
+      if (state.quiz.idx + 1 >= list.length) {
+        toast('已完成本题库');
+      } else {
+        state.quiz.idx++; state.quiz.picked = -1; state.quiz.revealed = false; renderQuiz();
+      }
+    }
+  };
+}
+
+/* ===== Course page ===== */
+function renderCourses() {
+  const grid = $('#course-grid');
+  if (state.courses.loading) { grid.innerHTML = '<div class="loading">加载社区课程…</div>'; return; }
+  const items = state.courses.items;
+  if (!items.length) { grid.innerHTML = '<div class="empty-hint">该科目/年级暂无社区课程</div>'; return; }
+  grid.innerHTML = '';
+  items.forEach(c => {
+    const subj = SUBJ_BY_KEY[c.subject];
+    const g = GRADES.find(x => x.key === c.grade);
+    const pct = Math.round(c.watched / c.lessons * 100);
+    const el = document.createElement('div');
+    el.className = 'course';
+    el.innerHTML = `
+      <div class="course-cover" style="background:linear-gradient(135deg, ${subj.color}, ${subj.color}cc)"><div class="course-subj">${subj.name} · ${g.label}${SEM_LABEL[c.semester]}</div></div>
+      <div class="course-body">
+        <div class="course-title">${c.title}</div>
+        <div class="course-meta">
+          <span>${c.watched}/${c.lessons} 节</span><span>·</span>
+          <span>${c.teacher}</span><span>·</span>
+          <span>${c.due}</span>
+        </div>
+        <div class="course-progress"><div class="course-progress-fill" style="width:${pct}%; background:${subj.color}"></div></div>
+        <div class="course-foot">
+          <span class="course-pct">${pct}%</span>
+          <span class="course-likes">♡ ${c.likes} · 今日 ${c.minutes}分</span>
+        </div>
+        <div style="margin-top:9px"><button class="course-action" data-subj="${c.subject}" data-min="${c.minutes}">继续学习 →</button></div>
+      </div>
+    `;
+    grid.appendChild(el);
+  });
+  $$('.course-action').forEach(btn => {
+    btn.onclick = () => {
+      const subj = btn.dataset.subj;
+      const mins = +btn.dataset.min;
+      addMinutes(subj, mins);
+      toast(`已记录 ${SUBJ_BY_KEY[subj].name} 学习 ${mins} 分钟`);
+      renderToday();
+    };
+  });
+}
+
+/* ===== Wrong notebook ===== */
+function renderWrongBadge() {
+  $('#wrong-badge').textContent = loadWrong().length > 0 ? loadWrong().length : '';
+}
+function renderWrong() {
+  const wrap = $('#wrong-list');
+  const arr = loadWrong();
+  if (!arr.length) { wrap.innerHTML = '<div class="empty-hint">错题本为空 · 去答题页答错几题试试</div>'; return; }
+  wrap.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  arr.forEach(item => {
+    const subj = SUBJ_BY_KEY[item.subject];
+    const g = GRADES.find(x => x.key === item.grade);
+    const el = document.createElement('div');
+    el.className = 'wrong-item';
+    const date = new Date(item.ts);
+    el.innerHTML = `
+      <div class="wrong-head">
+        <span class="quiz-tag" style="background:${subj.color}1a; color:${subj.color}">${subj.name}</span>
+        <span style="font-size:12px;color:var(--text-3)">${g.label} ${SEM_LABEL[item.semester]}</span>
+        <span style="font-size:12px;color:var(--text-3);margin-left:auto">${date.getMonth()+1}/${date.getDate()} ${fmt2(date.getHours())}:${fmt2(date.getMinutes())}</span>
+      </div>
+      <div class="wrong-q">${item.q}</div>
+      <div class="wrong-opts">
+        ${item.opts.map((o, i) => `
+          <div class="wrong-opt ${i===item.correctIdx?'correct':''} ${i===item.pickedIdx?'picked':''}">
+            <span style="font-weight:600;color:var(--text-2)">${letters[i]}.</span> ${o}
+            ${i===item.correctIdx?'<span style="margin-left:auto;color:var(--accent);font-size:11px">✓ 正确</span>':''}
+            ${i===item.pickedIdx?'<span style="margin-left:auto;color:var(--warn);font-size:11px">你的选择</span>':''}
+          </div>`).join('')}
+      </div>
+      ${item.e ? `<div class="quiz-explain"><strong>解析 ·</strong> ${item.e}</div>` : ''}
+      <div class="wrong-foot">
+        <button class="btn btn-ghost" data-action="retry" data-id="${item.id}">重做此题</button>
+        <button class="btn btn-ghost" data-action="del" data-id="${item.id}">移除</button>
+      </div>
+    `;
+    wrap.appendChild(el);
+  });
+  $$('.wrong-item button').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.id;
+      if (btn.dataset.action === 'del') {
+        removeWrong(id); renderWrong(); renderWrongBadge(); renderToday();
+      } else {
+        // 重做: 跳转到答题页, 加载该学科该年级题目, 定位到错题
+        const item = loadWrong().find(x => x.id === id);
+        if (!item) return;
+        state.activeSubject = item.subject;
+        state.subjectGrade[item.subject] = { grade: item.grade, semester: item.semester };
+        rerenderAll().then(() => {
+          // 找到对应题目
+          const found = state.quiz.items.findIndex(x => x.q === item.q);
+          if (found >= 0) { state.quiz.idx = found; state.quiz.picked = -1; state.quiz.revealed = false; }
+          switchPage('quiz');
+          toast('已定位到错题, 请重做');
+        });
+      }
+    };
+  });
+}
+
+/* ===== Real study time tracker ===== */
+let timeTrackerTimer = null;
+let lastTickAt = Date.now();
+function startTimeTracker() {
+  if (timeTrackerTimer) clearInterval(timeTrackerTimer);
+  lastTickAt = Date.now();
+  timeTrackerTimer = setInterval(() => {
+    if (document.hidden) { lastTickAt = Date.now(); return; }
+    const now = Date.now();
+    const elapsedMin = (now - lastTickAt) / 60000;
+    lastTickAt = now;
+    // 仅在答题或网课页且选中具体科目时累计
+    const activePage = document.querySelector('.page.active')?.id;
+    if ((activePage === 'page-quiz' || activePage === 'page-course') && state.activeSubject !== 'all') {
+      addMinutes(state.activeSubject, elapsedMin);
+      renderToday();
+    }
+  }, 15000); // 每 15 秒结算一次实际停留时长
+}
+
+/* ===== Clock ===== */
+function tickClock() {
+  const now = new Date();
+  $('#clock').textContent = fmt2(now.getHours()) + ':' + fmt2(now.getMinutes()) + ':' + fmt2(now.getSeconds());
+  const w = ['日','一','二','三','四','五','六'][now.getDay()];
+  $('#date-label').textContent = `${now.getFullYear()}-${fmt2(now.getMonth()+1)}-${fmt2(now.getDate())} 周${w}`;
+}
+
+/* ===== Page switching ===== */
+function switchPage(name) {
+  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.page === name));
+  $$('.page').forEach(p => p.classList.remove('active'));
+  $('#page-' + name).classList.add('active');
+  if (name === 'quiz') renderQuiz();
+  if (name === 'course') renderCourses();
+  if (name === 'wrong') renderWrong();
+}
+
+async function rerenderAll() {
+  renderFilters();
+  renderToday();
+  await Promise.all([fetchQuizzes(), fetchCourses()]);
+  renderWrong();
+  renderWrongBadge();
+}
+
+/* ===== Init ===== */
+(async function init() {
+  tickClock();
+  setInterval(tickClock, 1000);
+  startTimeTracker();
+  renderFilters();
+  renderToday();
+  renderWrong();
+  renderWrongBadge();
+  await Promise.all([fetchQuizzes(), fetchCourses(), fetchCrawlerStatus()]);
+
+  // 事件绑定
+  $$('.tab').forEach(t => t.onclick = () => switchPage(t.dataset.page));
+  $('#quiz-refresh').onclick = async () => {
+    toast('正在刷新社区题库…');
+    try { await api('/api/refresh'); } catch {}
+    await fetchQuizzes(); fetchCrawlerStatus();
+    toast('社区题库已更新');
+  };
+  $('#course-refresh').onclick = async () => {
+    toast('正在刷新社区课程…');
+    try { await api('/api/refresh'); } catch {}
+    await fetchCourses(); fetchCrawlerStatus();
+    toast('社区课程已更新');
+  };
+  $('#wrong-clear').onclick = () => {
+    if (loadWrong().length === 0) { toast('错题本已为空'); return; }
+    if (confirm('确定清空所有错题?')) { saveWrong([]); renderWrong(); renderWrongBadge(); renderToday(); toast('已清空'); }
+  };
+
+  // 定时轮询: 每 60 秒检查社区资源是否变动 (feedVersion), 变动则刷新当前页
+  setInterval(async () => {
+    await fetchCrawlerStatus();
+    const v = state.crawler.feedVersion;
+    const activePage = document.querySelector('.page.active')?.id;
+    if (activePage === 'page-quiz' && v !== state.quiz.feedVersion) {
+      // 题库已变动, 后台静默刷新 (不重置当前答题进度, 仅更新数据源标记)
+      state.quiz.feedVersion = v;
+      renderQuiz();
+      toast(`社区题库已更新 · v${v}`);
+    }
+    if (activePage === 'page-course' && v !== state.courses.feedVersion) {
+      state.courses.feedVersion = v;
+      await fetchCourses();
+      toast(`社区课程已更新 · v${v}`);
+    }
+  }, 60000);
+})();
+</script>
+
+</body>
+</html>
